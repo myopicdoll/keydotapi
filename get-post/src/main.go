@@ -55,7 +55,7 @@ func main() {
 func GetUser(c *gin.Context) {
     uid := c.Params.ByName("uid")
     var user User
-    err := dbmap.SelectOne(&user, "select * from userinfo where uid = $1 limit 1", uid)
+    err := dbmap.SelectOne(&user, "select * from user where uid = $1 limit 1", uid)
     if err == nil {
         info := &User{
             Id: user.Id,
@@ -71,7 +71,7 @@ func GetUser(c *gin.Context) {
 
 func GetUsers(c *gin.Context) {
     var users []User
-    _, err := dbmap.Select(&users, "select * from userinfo")
+    _, err := dbmap.Select(&users, "select * from user")
     fmt.Println(users)
     if err == nil {
         c.JSON(200, users)
@@ -85,7 +85,7 @@ func PostUser(c *gin.Context) {
     t := time.Now()
     c.Bind(&user)
     if user.Username != "" && user.Department != "" {
-        if insert, _ := dbmap.Exec(`insert into userinfo (username, departname, created) values ($1, $2, $3)`, user.Username, user.Department, t); insert != nil {
+        if insert, _ := dbmap.Exec(`insert into user (username, departname, created) values ($1, $2, $3)`, user.Username, user.Department, t); insert != nil {
          info := &User{
             Username: user.Username,
             Department: user.Department,

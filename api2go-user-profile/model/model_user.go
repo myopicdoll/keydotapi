@@ -1,0 +1,105 @@
+ package model
+
+import (
+	"time"
+	"errors"
+	"strconv"
+	"strings"
+	"fmt"
+	"github.com/manyminds/api2go/jsonapi"
+)
+
+// User is a generic database user
+type User struct {
+	Uid       int64         `db:"user_id" json:"user_id"`
+	Username  string      `db:"username" json:"username"`
+	Password  string      `db:"passwordhash" json:"-"`
+	Created   time.Time   `db:"created_at" json:"created_at"`
+	Updated   time.Time   `db:"last_update" json:"updated_at"`
+	Profiles  string      `db:"profile_ids" json:"profile_ids"`
+	// Profiles  []int64       `db:"profile_ids" json:"profile_ids"`
+	exists    bool        `db:"-"`
+}
+
+// GetID to satisfy jsonapi.MarshalIdentifier interface
+func (u User) GetID() string {
+	// int to string
+	return strconv.FormatInt(u.Uid, 10)
+}
+
+// SetID to satisfy jsonapi.UnmarshalIdentifier interface
+func (u *User) SetID(id string) error {
+	var err error
+	// string to int
+	u.Uid, err = strconv.ParseInt(id, 10, 64)
+	return err
+}
+
+// GetReferences to satisfy the jsonapi.MarshalReferences interface
+func (u User) GetReferences() []jsonapi.Reference {
+	return []jsonapi.Reference{
+		{
+			Type: "profiles",
+			Name: "profiles",
+		},
+	}
+}
+
+// GetReferencedIDs to satisfy the jsonapi.MarshalLinkedRelations interface
+func (u User) GetReferencedIDs() []jsonapi.ReferenceID {
+	result := []jsonapi.ReferenceID{}
+	// split id string into ids
+	s := strings.Split(u.Profiles, ",")
+    for i := range s {
+    	fmt.Println(s[i])
+    	result = append(result, jsonapi.ReferenceID{
+			ID: string(s[i]),
+			Type: "user-profile",
+			Name: "profiles",
+		})
+	}
+	return result
+}
+
+// GetReferencedStructs to satisfy the jsonapi.MarhsalIncludedRelations interface
+// TODO: pull in profile struc!!!!
+func (u User) GetReferencedStructs() []jsonapi.MarshalIdentifier {
+	result := []jsonapi.MarshalIdentifier{}
+	// for key := range u.Profiles {
+	// 	result = append(result, u.Profiles[key])
+	// }
+	return result
+}
+
+// SetToManyReferenceIDs sets the sweets reference IDs and satisfies the jsonapi.UnmarshalToManyRelations interface
+func (u *User) SetToManyReferenceIDs(name string, IDs []string) error {
+	// if name == "sweets" {
+	// 	u.ChocolatesIDs = IDs
+	// }
+	return errors.New("There is no to-many relationship with the name " + name)
+}
+
+// AddToManyIDs adds some new sweets that a users loves so much
+func (u *User) AddToManyIDs(name string, IDs []string) error {
+	// if name == "sweets" {
+	// 	u.ChocolatesIDs = append(u.ChocolatesIDs, IDs...)
+	// }
+
+	return errors.New("There is no to-many relationship with the name " + name)
+}
+
+// DeleteToManyIDs removes some sweets from a users because they made him very sick
+func (u *User) DeleteToManyIDs(name string, IDs []string) error {
+	// if name == "sweets" {
+	// 	for _, ID := range IDs {
+	// 		for pos, oldID := range u.ChocolatesIDs {
+	// 			if ID == oldID {
+	// 				// match, this ID must be removed
+	// 				u.ChocolatesIDs = append(u.ChocolatesIDs[:pos], u.ChocolatesIDs[pos+1:]...)
+	// 			}
+	// 		}
+	// 	}
+	// }
+
+	return errors.New("There is no to-many relationship with the name " + name)
+}
