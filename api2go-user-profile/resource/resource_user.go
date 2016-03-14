@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
+	"strings"
 	"fmt"
 	"api-sandbox/api2go-user-profile/model"
 	"api-sandbox/api2go-user-profile/storage"
@@ -22,26 +23,24 @@ func (s UserResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	var result []model.User
 	users, _ := s.UserStorage.GetAll()
 	fmt.Println(users)
-	// if err != nil {
-	// 	return &Response{}, err
-	// }
-	// for _, user := range users {
-	// 	// get all sweets for the user
-	// 	user.Chocolates = []model.Chocolate{}
-	// 	// for _, chocolateID := range user.ChocolatesIDs {
-	// 	// 	choc, err := s.ChocStorage.GetOne(chocolateID)
-	// 	// 	if err != nil {
-	// 	// 		return &Response{}, err
-	// 	// 	}
-	// 	// 	user.Chocolates = append(user.Chocolates, choc)
-	// 	// }
-	// 	
-	// }
+	// build nested profiles
 	for _, user := range users {
-		fmt.Println(user)
+		// get all profiles for the user
+		user.Profiles = []model.Profile{}
+		user.ProfilesIDList = []int64{}
+		// parse profile id string
+		pids := strings.Split(user.ProfilesIDs, ",")
+	    for i := range pids { 
+	    	prof, err := s.ProfStorage.GetOne(pids[i])
+	    	if err != nil {
+	    		return &Response{}, err
+	    	}
+	    	pid_int, err := strconv.ParseInt(pids[i], 10, 64)
+	    	user.ProfilesIDList = append(user.ProfilesIDList, pid_int)
+	    	user.Profiles = append(user.Profiles, prof)
+		}
 		result = append(result, *user)
 	}
-	fmt.Println(result)
 	return &Response{Res: result}, nil
 }
 
@@ -131,16 +130,20 @@ func (s UserResource) FindOne(ID string, r api2go.Request) (api2go.Responder, er
 	user, err := s.UserStorage.GetOne(ID)
 	if err != nil {
 		return &Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusNotFound)
+	}	
+	user.Profiles = []model.Profile{}
+	user.ProfilesIDList = []int64{}
+	// parse profile id string
+	pids := strings.Split(user.ProfilesIDs, ",")
+    for i := range pids { 
+    	prof, err := s.ProfStorage.GetOne(pids[i])
+    	if err != nil {
+    		return &Response{}, err
+    	}
+    	pid_int, _ := strconv.ParseInt(pids[i], 10, 64)
+    	user.ProfilesIDList = append(user.ProfilesIDList, pid_int)
+    	user.Profiles = append(user.Profiles, prof)
 	}
-
-	// user.Profiles = []model.Profile{}
-	// for _, chocolateID := range user.ChocolatesIDs {
-	// 	choc, err := s.ChocStorage.GetOne(chocolateID)
-	// 	if err != nil {
-	// 		return &Response{}, err
-	// 	}
-	// 	user.Chocolates = append(user.Chocolates, choc)
-	// }
 	return &Response{Res: user}, nil
 }
 

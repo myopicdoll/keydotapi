@@ -16,8 +16,9 @@ type User struct {
 	Password  string      `db:"passwordhash" json:"-"`
 	Created   time.Time   `db:"created_at" json:"created_at"`
 	Updated   time.Time   `db:"last_update" json:"updated_at"`
-	Profiles  string      `db:"profile_ids" json:"profile_ids"`
-	// Profiles  []int64       `db:"profile_ids" json:"profile_ids"`
+	ProfilesIDs  string    `db:"profile_ids" json:"-"`
+	ProfilesIDList  []int64    `db:"-" json:"profile_ids"`
+	Profiles  []Profile   `db:"-" json:"profiles"`
 	exists    bool        `db:"-"`
 }
 
@@ -49,7 +50,7 @@ func (u User) GetReferences() []jsonapi.Reference {
 func (u User) GetReferencedIDs() []jsonapi.ReferenceID {
 	result := []jsonapi.ReferenceID{}
 	// split id string into ids
-	s := strings.Split(u.Profiles, ",")
+	s := strings.Split(u.ProfilesIDs, ",")
     for i := range s {
     	fmt.Println(s[i])
     	result = append(result, jsonapi.ReferenceID{
@@ -60,22 +61,21 @@ func (u User) GetReferencedIDs() []jsonapi.ReferenceID {
 	}
 	return result
 }
-
 // GetReferencedStructs to satisfy the jsonapi.MarhsalIncludedRelations interface
-// TODO: pull in profile struc!!!!
-func (u User) GetReferencedStructs() []jsonapi.MarshalIdentifier {
-	result := []jsonapi.MarshalIdentifier{}
-	// for key := range u.Profiles {
-	// 	result = append(result, u.Profiles[key])
-	// }
-	return result
-}
+// func (u User) GetReferencedStructs() []jsonapi.MarshalIdentifier {
+// 	result := []jsonapi.MarshalIdentifier{}
+// 	for key := range u.Profiles {
+// 		result = append(result, u.Profiles[key])
+// 	}
+// 	fmt.Println(result)
+// 	return result
+// }
 
-// SetToManyReferenceIDs sets the sweets reference IDs and satisfies the jsonapi.UnmarshalToManyRelations interface
-func (u *User) SetToManyReferenceIDs(name string, IDs []string) error {
-	// if name == "sweets" {
-	// 	u.ChocolatesIDs = IDs
-	// }
+// SetToManyReferenceIDs sets the profile reference IDs and satisfies the jsonapi.UnmarshalToManyRelations interface
+func (u *User) SetToManyReferenceIDs(name string, IDs []int64) error {
+	if name == "profile" {
+		u.ProfilesIDList = IDs
+	}
 	return errors.New("There is no to-many relationship with the name " + name)
 }
 

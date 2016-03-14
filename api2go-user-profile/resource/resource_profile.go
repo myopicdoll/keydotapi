@@ -16,29 +16,12 @@ type ProfileResource struct {
 
 // FindAll profiles
 func (p ProfileResource) FindAll(r api2go.Request) (api2go.Responder, error) {
-	// usersID, ok := r.QueryParams["usersID"]
-	//sweets := c.ChocStorage.GetAll()
-	//if ok {
-		// this means that we want to show all sweets of a user, this is the route
-		// /v0/users/1/sweets
-		// userID := usersID[0]
-		// filter out sweets with userID, in real world, you would just run a different database query
-		filteredProfs := []model.Profile{}
-		// user, err := c.UserStorage.GetOne(userID)
-		// if err != nil {
-		// 	return &Response{}, err
-		// }
-		// for _, sweetID := range user.ChocolatesIDs {
-		// 	sweet, err := c.ChocStorage.GetOne(sweetID)
-		// 	if err != nil {
-		// 		return &Response{}, err
-		// 	}
-		// 	filteredSweets = append(filteredSweets, sweet)
-		// }
-
-		return &Response{Res: filteredProfs}, nil
-	//}
-	//return &Response{Res: sweets}, nil
+	var result []model.Profile
+	profs, _ := p.ProfStorage.GetAll()
+	for _, prof := range profs {
+		result = append(result, *prof)
+	}
+	return &Response{Res: result}, nil
 }
 
 // FindOne prof

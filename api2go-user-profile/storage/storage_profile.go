@@ -16,10 +16,20 @@ type ProfileStorage struct {
 	db *gorp.DbMap
 }
 
-func (s ProfileStorage) GetAll() []model.Profile {
+func (s ProfileStorage) GetAll() (map[int64]*model.Profile, error) {
 	var profiles []model.Profile
-	s.db.Select(&profiles, "select * from profiles order by profile_id")
-	return profiles
+	_, err := s.db.Select(&profiles, "select * from profiles order by profile_id")
+	if err == nil {
+		profMap := make(map[int64]*model.Profile)
+		for i := range profiles {
+			p := &profiles[i]
+			profMap[p.Pid] = p
+		}
+		return profMap, nil
+	} else {
+		// return the error
+		return nil, err
+	}
 }
 
 // get one profile by profile id
