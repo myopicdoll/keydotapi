@@ -13,7 +13,7 @@ import (
 type User struct {
 	Uid       int64         `db:"user_id" json:"user_id"`
 	Username  string      `db:"username" json:"username"`
-	Password  string      `db:"passwordhash" json:"-"`
+	Password  string      `db:"passwordhash" json:"password"`
 	Created   time.Time   `db:"created_at" json:"created_at"`
 	Updated   time.Time   `db:"last_update" json:"updated_at"`
 	ProfilesIDs  string    `db:"profile_ids" json:"-"`
@@ -73,33 +73,31 @@ func (u User) GetReferencedIDs() []jsonapi.ReferenceID {
 
 // SetToManyReferenceIDs sets the profile reference IDs and satisfies the jsonapi.UnmarshalToManyRelations interface
 func (u *User) SetToManyReferenceIDs(name string, IDs []int64) error {
-	if name == "profile" {
+	if name == "profiles" {
 		u.ProfilesIDList = IDs
 	}
 	return errors.New("There is no to-many relationship with the name " + name)
 }
 
-// AddToManyIDs adds some new sweets that a users loves so much
-func (u *User) AddToManyIDs(name string, IDs []string) error {
-	// if name == "sweets" {
-	// 	u.ChocolatesIDs = append(u.ChocolatesIDs, IDs...)
-	// }
-
+// AddToManyIDs adds new profiles to a user
+func (u *User) AddToManyIDs(name string, IDs []int64) error {
+	if name == "profiles" {
+		u.ProfilesIDList = append(u.ProfilesIDList, IDs...)
+	}
 	return errors.New("There is no to-many relationship with the name " + name)
 }
 
-// DeleteToManyIDs removes some sweets from a users because they made him very sick
-func (u *User) DeleteToManyIDs(name string, IDs []string) error {
-	// if name == "sweets" {
-	// 	for _, ID := range IDs {
-	// 		for pos, oldID := range u.ChocolatesIDs {
-	// 			if ID == oldID {
-	// 				// match, this ID must be removed
-	// 				u.ChocolatesIDs = append(u.ChocolatesIDs[:pos], u.ChocolatesIDs[pos+1:]...)
-	// 			}
-	// 		}
-	// 	}
-	// }
-
-	return errors.New("There is no to-many relationship with the name " + name)
+// DeleteToManyIDs removes profiles from a user
+func (u *User) DeleteToManyIDs(name string, IDs []int64) error {
+	if name == "profiles" {
+		for _, ID := range IDs {
+			for pos, oldID := range u.ProfilesIDList {
+				if ID == oldID {
+					// match, this ID must be removed
+					u.ProfilesIDList = append(u.ProfilesIDList[:pos], u.ProfilesIDList[pos+1:]...)
+				}
+			}
+		}
+	}
+	return errors.New("There is no to-many relationship with the " + name)
 }

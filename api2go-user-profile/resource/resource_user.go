@@ -153,22 +153,23 @@ func (s UserResource) Create(obj interface{}, r api2go.Request) (api2go.Responde
 	if !ok {
 		return &Response{}, api2go.NewHTTPError(errors.New("Invalid instance given"), "Invalid instance given", http.StatusBadRequest)
 	}
-
-	id, err := s.UserStorage.Insert(user)
+	err := s.UserStorage.Insert(user)
 	if err != nil {
-		return &Response{}, api2go.NewHTTPError(errors.New("Failed to create a user"), "Faild to create a user", http.StatusInternalServerError)
-	}
-	err = user.SetID(id)
+		return &Response{}, api2go.NewHTTPError(errors.New("Failed to create a user"), "Failed to create a user", http.StatusInternalServerError)
+	} 
+	// err = user.SetID(id)
 	if err != nil {
 		return &Response{}, api2go.NewHTTPError(errors.New("Non-integer ID given"), "Non-integer ID given", http.StatusInternalServerError)
 	}
-
 	return &Response{Res: user, Code: http.StatusCreated}, nil
 }
 
 // // Delete to satisfy `api2go.DataSource` interface
 func (s UserResource) Delete(id string, r api2go.Request) (api2go.Responder, error) {
 	err := s.UserStorage.Delete(id)
+	if err != nil {
+		return &Response{}, api2go.NewHTTPError(errors.New("Failed to delete user"), "Failed to delete user", http.StatusInternalServerError)
+	}
 	return &Response{Code: http.StatusNoContent}, err
 }
 
@@ -177,8 +178,7 @@ func (s UserResource) Update(obj interface{}, r api2go.Request) (api2go.Responde
 	user, ok := obj.(model.User)
 	if !ok {
 		return &Response{}, api2go.NewHTTPError(errors.New("Invalid instance given"), "Invalid instance given", http.StatusBadRequest)
-	}
-
+	} 
 	err := s.UserStorage.Update(user)
 	return &Response{Res: user, Code: http.StatusNoContent}, err
 }

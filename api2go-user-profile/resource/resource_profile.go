@@ -57,7 +57,6 @@ func (p ProfileResource) Update(obj interface{}, r api2go.Request) (api2go.Respo
 	if !ok {
 		return &Response{}, api2go.NewHTTPError(errors.New("Invalid instance given"), "Invalid instance given", http.StatusBadRequest)
 	}
-
 	err := p.ProfStorage.Update(prof)
 	return &Response{Res: prof, Code: http.StatusNoContent}, err
 }
